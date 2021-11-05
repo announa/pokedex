@@ -10,7 +10,6 @@ body {
   background-attachment: fixed;
   min-height: 100vh;
 
-
   --bg-fire: rgb(251, 106, 106);
   --bg-fire-numbers: 251, 106, 106;
   --bg-grass: rgb(73, 208, 176);
@@ -267,9 +266,8 @@ button {
   right: 15px;
 }
 
-
 #to-top-btn:hover {
-  background: radial-gradient(at 50% 45%, rgba(255, 255, 255, .9) 10%, transparent 70%);
+  background: radial-gradient(at 50% 45%, rgba(255, 255, 255, 0.9) 10%, transparent 70%);
 }
 
 #to-top-btn img {
@@ -592,7 +590,7 @@ th {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 5px solid rgba(var(--bg-grass-numbers), .5);
+  border: 5px solid rgba(var(--bg-grass-numbers), 0.5);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
   position: relative;
 }
@@ -665,7 +663,7 @@ th {
     height: 30%;
   }
 
-  .pokeinfo{
+  .pokeinfo {
     padding-top: 45px;
   }
 }
@@ -767,12 +765,12 @@ th {
     margin-bottom: 30px;
   }
 
-  table{
+  table {
     width: 100%;
     /* table-layout: fixed; */
   }
-  
-  tbody{
+
+  tbody {
     display: flex;
     flex-direction: row;
   }
@@ -782,20 +780,19 @@ th {
     flex-direction: column;
   }
 
-  #about-table tr{
+  #about-table tr {
     width: 20%;
   }
-  #stats-table tr{
+  #stats-table tr {
     width: 14%;
-
   }
-  
-  th{
+
+  th {
     width: unset;
     text-align: center;
     white-space: nowrap;
   }
-  
+
   td {
     text-align: center;
   }

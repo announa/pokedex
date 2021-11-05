@@ -139,9 +139,9 @@ function renderPokemonCard(currentPokemon, renderContainer) {
   createAdjacentHTML(pokemonName, renderContainer, pokemonImg));
 }
 
-function getPokemonImage(currentPokemon){
+function getPokemonImage(currentPokemon) {
   let pokemonImg = currentPokemon['sprites']['other']['official-artwork']['front_default'];
-  if(!pokemonImg){
+  if (!pokemonImg) {
     pokemonImg = './img/default_img.svg';
   }
   return pokemonImg;
@@ -524,7 +524,7 @@ async function renderSearchResult(matchingPokemonNames) {
   let searchResultPokemons = await loadMatchingPokemons(matchingPokemonNames);
   hideLoadingCircle();
   searchResultPokemons.forEach((pokemon) => addPokemonCard(pokemon, 'search-result'));
-  goToTop()
+  goToTop();
   loadingPokemon = false;
 }
 
@@ -547,7 +547,7 @@ async function loadMatchingPokemons(matchingPokemonNames) {
 
 /**
  * Gets the matching pokemon-object. Checks if it has already been loaded to the global variable loadedPokemons. If not, gets it from the API.
- * 
+ *
  * @param {string} matchingPokemonName - The name of the currently checked Pokemon.
  * @returns {object} - The pokemon-object corresponging to matchingPokemonName.
  */
@@ -573,13 +573,12 @@ function closeSearchResult() {
 
 /* -----------------  LOADING ANIMATIONS  ----------------- */
 
-
 /**
  * Shows a animation with a blue border around the new rendered cards in the Pokédex for indicating to the user which cards have been new loaded after scrolling to the bottom of the page.
  *
  * @param {string} pokemonName - The name of the current Pokemon.
  */
- function showLoadingCardAnimation(pokemonName) {
+function showLoadingCardAnimation(pokemonName) {
   if (pokedexIndex > 19) document.getElementById(pokemonName + '-pokedex').classList.add('loading-animation');
 }
 
@@ -596,7 +595,7 @@ function showLightReflexAnimation() {
 /**
  * Shows the rotating-circle-animation for signalising that data is beeing loaded.
  */
- function showLoadingCircle() {
+function showLoadingCircle() {
   document.getElementById('loading-circle-bg').classList.remove('d-none');
 }
 
@@ -617,7 +616,7 @@ window.onscroll = function () {
 /**
  * Shows or hides the to-top-button dependong on the scroll-position.
  */
-function toggleToTopButton(){
+function toggleToTopButton() {
   if (window.scrollY > window.innerHeight) {
     document.getElementById('to-top-btn').classList.remove('d-none');
   } else {
@@ -628,7 +627,7 @@ function toggleToTopButton(){
 /**
  * Checks if the end of document is reached and, if so, loads more Pokemon.
  */
-function loadMorePokemon(){
+function loadMorePokemon() {
   if (
     window.scrollY + window.innerHeight >= document.body.offsetHeight &&
     loadingPokemon === false &&
@@ -641,7 +640,7 @@ function loadMorePokemon(){
 /**
  * Scrolls to the top of the page without scroll-behaviour: smooth;
  */
-function goToTop(){
+function goToTop() {
   window.scrollTo(0, 0);
 }
 
@@ -652,7 +651,7 @@ function scrollToTop() {
   document.documentElement.style.scrollBehavior = 'smooth';
   setTimeout(() => {
     goToTop();
-    document.documentElement.style.scrollBehavior = 'auto';   
+    document.documentElement.style.scrollBehavior = 'auto';
   }, 10);
 }
 
