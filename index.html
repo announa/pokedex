@@ -14,11 +14,19 @@
     <script src="script.js"></script>
     <title>Document</title>
   </head>
-  <body class="flex-centered col" onload="showLogo(), checkWindowSize()">
+  <body class="flex-centered col" onload="init(), adjustPokeImgToWindowSize()">
     <div id="logo" class="d-none">
       <img src="./img/pokemon-logo.png" id="logo-img" />
       <button id="load-pokedex-btn" class="transparent-btn" onclick="loadPokedex()">Load Pokedéx</button>
     </div>
+
+    <!-- ------------------  LOADING CIRCLE  ------------------ -->
+
+    <div class="loading-circle-bg d-none" id="loading-circle-bg"><div class="loading-circle"></div></div>
+
+
+    <!-- ------------------  SEARCH  -------------------- -->
+
     <!-- <div id="search-header" class="flex-centered"> -->
     <div id="search-container" class="flex-centered d-none">
       <!-- <div id="search-container" class="flex-centered d-none" onmouseleave="closeSearchField()"> -->
@@ -30,7 +38,7 @@
         oninput="startSearch()"
       />
       <!-- onkeypress="checkIfEnter(event)" -->
-      <button id="search-btn" class="button-filled flex-centered" onclick="openCloseSearchField(), showSearchHint()">
+      <button id="search-btn" class="button-filled flex-centered" onclick="toggleSearchField()">
         <img src="./img/search-pokeball.svg" id="search-icon" alt="search" />
       </button>
     </div>
@@ -43,6 +51,9 @@
       <img src="./img/arrow-left.png" /><span id="close-searc-text">Pokedéx</span>
     </button>
     <div id="search-result" class="flex-centered wrap d-none"></div>
+
+    <!-- ----------------  POKÉDEX  ------------------- -->
+
     <div id="pokedex" class="flex-centered wrap"></div>
     <button id="to-top-btn" class="transparent-btn d-none" onclick="scrollToTop()">
       <img src="./img/arrow-up.png" class="transparent-btn-icon" alt="to top" />
@@ -50,20 +61,20 @@
 
     <!-- ----------------  SHOW SELECTED POKEMON  ----------------- -->
 
-    <div id="pokecard--about-bg" class="flex-centered d-none" onclick="hidePokemon()">
-      <div id="pokecard--about" class="flex-centered col z-1" onclick="event.stopPropagation()">
+    <div id="selected-pokemon--bg" class="flex-centered d-none" onclick="hidePokemon()">
+      <div id="selected-pokemon-card" class="flex-centered col z-1" onclick="event.stopPropagation()">
         <button
-          id="close-pokecard-about-btn"
+          id="close-selected-pokemon-btn"
           class="close-btn transparent-btn flex-centered d-none"
           onclick="hidePokemon()"
         >
           <img src="./img/arrow-left.png" />
         </button>
-        <img class="pokemon-img z-1" id="about-pokemon-img" src=""/>
+        <img class="pokemon-img z-1" id="selected-pokemon-img" src=""/>
         <div id="pokecard-header" class="pokecard-header">
-          <img class="bg-pokeball bg-pokeball--about" src="./img/bg-pokeball.svg" />
-          <h1 id="about-pokemon-h1"></h1>
-          <div id="types--about" class="poketypes--about flex-centered"></div>
+          <img class="bg-pokeball bg-pokeball--selected-pokemon" src="./img/bg-pokeball.svg" />
+          <h1 id="selected-pokemon-h1"></h1>
+          <div id="types--selected-pokemon" class="poketypes--selected-pokemon flex-centered"></div>
         </div>
         <div id="pokeinfo" class="pokeinfo">
           <div class="pokeinfo-tabs flex-centered">

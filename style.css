@@ -2,7 +2,6 @@
   margin: 0;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
-  scroll-behavior: smooth;
 }
 
 body {
@@ -10,6 +9,7 @@ body {
   background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('./img/bg-img.jpg') bottom/cover;
   background-attachment: fixed;
   min-height: 100vh;
+
 
   --bg-fire: rgb(251, 106, 106);
   --bg-fire-numbers: 251, 106, 106;
@@ -131,10 +131,6 @@ button {
   animation: jumping-btn 500ms ease-in-out infinite alternate;
 }
 
-.transparent-btn:hover {
-  background: radial-gradient(rgba(255, 255, 255, 0.8) 20%, transparent 70%);
-}
-
 @keyframes jumping-btn {
   to {
     transform: translateY(-10%);
@@ -156,7 +152,7 @@ button {
 }
 
 .d-none {
-  display: none;
+  display: none !important;
 }
 
 /* --------------  LOGO  -------------- */
@@ -220,7 +216,7 @@ button {
 
 /* --------------  POKEDÉX  -------------- */
 
-.pokecard--gallery-view {
+.pokedex-view {
   width: 230px;
   height: 180px;
   flex-shrink: 0;
@@ -234,12 +230,12 @@ button {
   box-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
 }
 
-.pokecard--gallery-view:hover {
+.pokedex-view:hover {
   transform: translateY(-2%);
   box-shadow: 5px 5px 10px 2px rgba(75, 53, 53, 0.5);
 }
 
-.pokemon-gallery-img {
+.pokedex-img {
   width: 50%;
   position: absolute;
   right: 5px;
@@ -271,14 +267,19 @@ button {
   right: 15px;
 }
 
+
+#to-top-btn:hover {
+  background: radial-gradient(at 50% 45%, rgba(255, 255, 255, .9) 10%, transparent 70%);
+}
+
 #to-top-btn img {
   width: 40px;
   filter: invert(20%);
 }
 
-/* --------------  ABOUT POKEMON  -------------- */
+/* --------------  SHOW SELECTED POKEMON  -------------- */
 
-#pokecard--about-bg {
+#selected-pokemon--bg {
   justify-content: space-evenly;
   width: 100%;
   height: 100vh;
@@ -307,7 +308,7 @@ button {
   z-index: 2;
 }
 
-#pokecard--about {
+#selected-pokemon-card {
   position: absolute;
   right: 20vw;
   align-items: flex-start;
@@ -333,24 +334,33 @@ button {
   backdrop-filter: blur(5px);
 }
 
-.bg-pokeball--about {
+.bg-pokeball--selected-pokemon {
   right: -5px;
   bottom: -20px;
   filter: invert(100%) opacity(10%);
 }
 
-#about-pokemon-h1 {
+#selected-pokemon-h1 {
   font-size: 1.9rem;
   margin-bottom: 10px;
 }
 
-.poketypes--about {
+.poketypes--selected-pokemon {
   justify-content: flex-start;
 }
 
 .poketype {
   padding: 5px;
   margin-bottom: 10px;
+}
+
+#close-selected-pokemon-btn img {
+  width: 30px;
+  filter: invert(100%);
+}
+
+#close-selected-pokemon-btn:hover {
+  background: radial-gradient(at 50% 45%, rgba(255, 255, 255, 0.3) 10%, transparent 55%);
 }
 
 /* ---------------  POKEMON INFOS  ----------------- */
@@ -390,7 +400,7 @@ button {
   text-underline-offset: 10px;
 }
 
-/* -----------------  ABOUT POKEMON TABLE  --------------- */
+/* -----------------  SELECTED POKEMON INFO TABLE  --------------- */
 
 table {
   font-size: 0.9rem;
@@ -508,18 +518,13 @@ th {
   letter-spacing: -0.5px;
 }
 
-#close-pokecard-about-btn img {
-  width: 30px;
-  filter: invert(100%);
-}
-
-#close-pokecard-about-btn:hover {
-  background: radial-gradient(rgba(255, 255, 255, 0.3) 20%, transparent 70%);
+#close-search-result-btn:hover {
+  background: radial-gradient(at 55% 50%, rgba(255, 255, 255, 0.6) 10%, transparent 60%);
 }
 
 /* ---------------  CARD ANIMATION  -------------- */
 
-.card-anim-layer {
+.light-anim-layer {
   height: 150%;
   width: 150%;
   background: linear-gradient(
@@ -536,18 +541,18 @@ th {
   z-index: 2;
 }
 
-.card-animation {
-  animation: card-animation 500ms linear forwards;
+.light-animation {
+  animation: light-animation 400ms linear forwards 700ms;
 }
 
-@keyframes card-animation {
+@keyframes light-animation {
   to {
     top: 100%;
     left: 100%;
   }
 }
 
-/* ---------------  LOADING ANIMATION  --------------- */
+/* ---------------  LOADING ANIMATION FOR CARDS --------------- */
 
 .loading-animation {
   box-shadow: 0 0 0 20px rgb(168, 219, 221);
@@ -569,6 +574,51 @@ th {
   }
 }
 
+/* --------------  LOADING CIRCLE  -------------- */
+
+.loading-circle-bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  background: rgba(150, 150, 150, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3;
+}
+.loading-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 5px solid rgba(var(--bg-grass-numbers), .5);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.loading-circle::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: -5px;
+  left: -5px;
+  border-radius: 50%;
+  border: 5px solid transparent;
+  border-right: 5px solid rgba(var(--bg-grass-numbers), 1);
+  animation: loading-circle 1s ease-in-out infinite;
+}
+
+@keyframes loading-circle {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /* ---------------  MEDIA QUERY  ---------------- */
 
 @media (max-width: 1000px) {
@@ -582,7 +632,7 @@ th {
 }
 
 @media (max-width: 850px) {
-  #pokecard--about {
+  #selected-pokemon-card {
     right: 15vw;
   }
   .pokemon-img {
@@ -605,7 +655,7 @@ th {
     width: 50%;
   }
 
-  #pokecard--about {
+  #selected-pokemon-card {
     position: relative;
     right: unset;
     aspect-ratio: 3/5;
@@ -631,8 +681,8 @@ th {
     font-size: 1.8rem;
   }
 
-  #close-pokecard-about-btn {
-    display: unset;
+  #close-selected-pokemon-btn {
+    display: unset !important;
   }
   @keyframes logo-animation {
     to {
@@ -651,6 +701,7 @@ th {
     bottom: 20px;
     right: 10px;
   }
+
   #to-top-btn img {
     width: 30px;
   }
@@ -659,13 +710,13 @@ th {
     margin-bottom: 15px;
   }
 
-  #close-pokecard-about-btn {
+  #close-selected-pokemon-btn {
     position: absolute;
     top: unset;
     left: 10px;
     bottom: 10px;
   }
-  #close-pokecard-about-btn img {
+  #close-selected-pokemon-btn img {
     width: 25px;
   }
   #search-input {
@@ -674,7 +725,7 @@ th {
 }
 
 @media (max-height: 570px) {
-  #pokecard--about {
+  #selected-pokemon-card {
     position: relative;
     right: unset;
     height: 325px;
@@ -702,7 +753,7 @@ th {
     top: -30px;
   }
 
-  #about-pokemon-h1 {
+  #selected-pokemon-h1 {
     margin-right: 50px;
     margin-bottom: 0;
   }
@@ -746,22 +797,20 @@ th {
   }
   
   td {
-    /* padding: 5px 20px; */
-    /* vertical-align: top; */
     text-align: center;
   }
 
-  #close-pokecard-about-btn {
+  #close-selected-pokemon-btn {
     display: unset;
   }
 
-  #close-pokecard-about-btn {
+  #close-selected-pokemon-btn {
     position: absolute;
     top: unset;
     left: 10px;
     bottom: 10px;
   }
-  #close-pokecard-about-btn img {
+  #close-selected-pokemon-btn img {
     width: 25px;
   }
 }

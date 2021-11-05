@@ -1,53 +1,24 @@
 let allPokemonNames = [];
-let loadedPokedexPokemons = [];
+let loadedPokemons = [];
+let pokedexIndex = 0;
 let searchIsOpen = false;
-let searchResultPokemons = [];
-let activeTab = 'tab-1';
-let activeType;
 let searchTimer;
+let activeTab = 'tab-1';
+let loadingPokemon = false;
+let currentScrollPosition = 0;
 
-function showLogo() {
+/**
+ * Shows the Pokemon-Logo and initiats the loading of all Pokemon names.
+ */
+function init() {
   document.getElementById('logo').classList.remove('d-none');
-}
-
-function loadPokedex() {
-  document.getElementById('logo').classList.add('d-none');
-  document.getElementById('search-container').classList.remove('d-none');
-  document.getElementById('search-input').value = '';
-  loadPokemon();
   loadAllPokemonNames();
 }
 
-async function loadPokemon() {
-  await getPokemon();
-  showCardAnimation();
-}
+/* -------------------  LOAD POKEMON  --------------------- */
 
 /**
- * Gets the Pokemon-data for the Pokemon-cards in the Pokedex.
- */
-async function getPokemon() {
-  for (let i = 1; i <= 20; i++) {
-    let url = `https://pokeapi.co/api/v2/pokemon/${loadedPokedexPokemons.length + 1}`;
-    let response = await fetch(url);
-    let currentPokemon = await response.json();
-    loadedPokedexPokemons.push(currentPokemon);
-    addPokemonCard(currentPokemon, 'pokedex');
-  }
-}
-
-/**
- * Shows the light-reflex-animation when loading new Pokemon-cards.
- */
-function showCardAnimation() {
-  let cardAnimLayers = Array.from(document.getElementsByClassName('card-anim-layer'));
-  cardAnimLayers.forEach((layer) => {
-    layer.classList.add('card-animation');
-  });
-}
-
-/**
- * Loads the names of all Pokemons for the search-function.
+ * Loads the names of all Pokemons from the Poke-API and pushes them into allPokemonNames.
  */
 async function loadAllPokemonNames() {
   let url = 'https://pokeapi.co/api/v2/pokemon?offset=0&limit=1118';
@@ -56,124 +27,200 @@ async function loadAllPokemonNames() {
   response.results.forEach((pokemon) => allPokemonNames.push(pokemon.name));
 }
 
-/* -----------------  LOAD POKEDÉX  ------------------ */
+/**
+ * Hides the Pokemon-Logo and shows the Pokedex. Initiats the loading of the first 20 Pokemon to the Pokedex.
+ */
+function loadPokedex() {
+  document.getElementById('logo').classList.add('d-none');
+  document.getElementById('search-container').classList.remove('d-none');
+  document.getElementById('search-input').value = '';
+  load20Pokemon();
+}
 
 /**
- * Adds the card of the currentPokemon to the active container (Pokedexor search-result).
+ * Loads 20 Pokemons to the Pokédex. Sets the variable loadingPokemon on true while loading for avoiding simultaneous loading when scrolling to the bottom of the page (which initiats the loading of 20 more Pokemons).
+ */
+async function load20Pokemon() {
+  loadingPokemon = true;
+  for (let i = 0; i < 20; i++) {
+    let currentPokemon = await getPokemon();
+    loadedPokemons.push(currentPokemon);
+    addPokemonCard(currentPokemon, 'pokedex');
+    pokedexIndex++;
+  }
+  loadingPokemon = false;
+}
+
+/**
+ * Gets the name and the object of the current Pokemon for the Pokédex-cards or the search-result (-> query). Checks if the current Pokemon has already been loaded to loadedPokemons and if not, gets it from the Poke-API.
+ *
+ * @param {string} query - The user-input into the search-field if input is a number. If the input is text, it is one of the Pokemon names that contain the user input. Only existent if the function as been called because of user-input in the search input-field.
+ * @returns {object} - The object of the Pokemon that currently will be rendered.
+ */
+async function getPokemon(query) {
+  let pokemonName = allPokemonNames[pokedexIndex];
+  if (query) {
+    pokemonName = getSearchedPokemonName(query);
+  }
+  let currentPokemon = checkAlreadyLoadedPokemon(pokemonName);
+  if (!currentPokemon) {
+    currentPokemon = await getPokemonFromUrl(pokemonName);
+  }
+  return currentPokemon;
+}
+
+/**
+ * Gets the name of the Pokemon that matches query.
+ *
+ * @param {string} query - The user-input into the search-field if input is a number. If the input is text, it is one of the Pokemon names that contain the user input.
+ * @returns {string} - The Pokemon name that matches the user-input.
+ */
+function getSearchedPokemonName(query) {
+  let pokemonName;
+  if (Number(query)) {
+    pokemonName = allPokemonNames[query - 1];
+  } else if (isNaN(query)) {
+    pokemonName = query;
+  }
+  return pokemonName;
+}
+
+/**
+ * Checks if loadedPokemons contains a Pokemon-object with pokemonName and if so, returns this object.
+ *
+ * @param {string} pokemonName - The name of the current Pokemon.
+ * @returns {object} - The object of the current Pokemon.
+ */
+function checkAlreadyLoadedPokemon(pokemonName) {
+  return loadedPokemons.find((pokemon) => pokemon.name === pokemonName);
+}
+
+/**
+ * Gets the current Pokemon-object from the Poke-API based on the name of the current Pokemon.
+ *
+ * @param {string} pokemonName - The name of the current Pokemon.
+ * @returns {object} - The current Pokemon-object.
+ */
+async function getPokemonFromUrl(pokemonName) {
+  let url = `https://pokeapi.co/api/v2/pokemon/${pokemonName}`;
+  let response = await fetch(url);
+  let currentPokemon = await response.json();
+  return currentPokemon;
+}
+
+/* -----------------  RENDER POKÉDEX OR SEARCH RESULTS ------------------ */
+
+/**
+ * Adds the card of the currentPokemon to the active container (Pokédex or search-result) and loads the animations.
+ *
+ * @param {object} currentPokemon - The Pokemon that will be rendered.
+ * @param {string} renderContainer - The container in which the currentPokemon will be rendered (Pokedex or search-result).
+ */
+function addPokemonCard(currentPokemon, renderContainer) {
+  renderPokemonCard(currentPokemon, renderContainer);
+  renderPokemonTypes(currentPokemon, renderContainer);
+  showLightReflexAnimation();
+  if (renderContainer === 'pokedex') {
+    showLoadingCardAnimation(currentPokemon['name']);
+  }
+}
+
+/**
+ * Renders the card of the current Pokemon to the active container (Pokédex or search-result).
+ *
+ * @param {object} currentPokemon - The Pokemon that will be rendered.
+ * @param {string} renderContainer - The container in which the currentPokemon will be rendered (Pokedex or
+ */
+function renderPokemonCard(currentPokemon, renderContainer) {
+  let pokemonName = currentPokemon['name'];
+  let pokemonImg = getPokemonImage(currentPokemon);
+  // prettier-ignore
+  document.getElementById(renderContainer).insertAdjacentHTML('beforeend',
+  createAdjacentHTML(pokemonName, renderContainer, pokemonImg));
+}
+
+function getPokemonImage(currentPokemon){
+  let pokemonImg = currentPokemon['sprites']['other']['official-artwork']['front_default'];
+  if(!pokemonImg){
+    pokemonImg = './img/default_img.svg';
+  }
+  return pokemonImg;
+}
+
+/**
+ * Creates the HTML-content that will be inserted in the renderContainer.
+ *
+ * @param {string} pokemonName - The name of the current Pokemon.
+ * @param {string} renderContainer - The container in which the currentPokemon will be rendered (Pokedex or search-result).
+ * @param {string} pokemonImg - The URL of the Pokemon image.
+ */
+function createAdjacentHTML(pokemonName, renderContainer, pokemonImg) {
+  return `<div id="${pokemonName}-${renderContainer}" onclick="showSelectedPokemon('${pokemonName}','${renderContainer}')" class="pokedex-view">
+  <div class="light-anim-layer"></div>
+  <img class="bg-pokeball" src="./img/bg-pokeball.svg">
+  <h1 id="pokename-${pokemonName}-${renderContainer}" class="pokename z-1">${pokemonName}</h1>
+  <div id="types-${pokemonName}-${renderContainer}" class="poketypes--gallery flex-centered col z-1"></div>
+  <img class="pokedex-img z-1" src="${pokemonImg}">
+  </div>`;
+}
+
+/**
+ * Renders the types the current Pokemon has and sets the background color of the current Pokemon-card in the Pokédex.
  * @param {object} currentPokemon - The Pokemon that is beeing rendered in the active container.
  * @param {string} renderContainer - The container in which the currentPokemon is beeing rendered (Pokedex or search-result).
  */
-function addPokemonCard(currentPokemon, renderContainer, searchResultIndex) {
-  let pokeIndex = setCurrentIndex(renderContainer, searchResultIndex);
-  let pokemonImg = currentPokemon['sprites']['other']['official-artwork']['front_default'];
-
-  renderPokemonCard(currentPokemon, pokeIndex, renderContainer, pokemonImg);
-
-  // prettier-ignore
-  getTypes(currentPokemon, 'types-' + pokeIndex + '-' +
-  renderContainer, 'pokemon-' + pokeIndex + '-' + renderContainer);
-  showLoadingAnimation(pokeIndex, renderContainer);
-}
-
-function setCurrentIndex(renderContainer, searchResultIndex) {
-  if (renderContainer === 'search-result') pokeIndex = searchResultIndex;
-  else pokeIndex = loadedPokedexPokemons.length - 1;
-  return pokeIndex;
-}
-
-function renderPokemonCard(currentPokemon, pokeIndex, renderContainer, pokemonImg) {
-  document.getElementById(renderContainer).insertAdjacentHTML(
-    'beforeend',
-    `
-  <div id="pokemon-${pokeIndex}-${renderContainer}" onclick="showPokemon(${pokeIndex},'${renderContainer}')" class="pokecard--gallery-view">
-  <div class="card-anim-layer"></div>
-  <img class="bg-pokeball" src="./img/bg-pokeball.svg">
-  <h1 id="pokename-${pokeIndex}-${renderContainer}" class="pokename z-1">${currentPokemon['name']}</h1>
-  <div id="types-${pokeIndex}-${renderContainer}" class="poketypes--gallery flex-centered col z-1"></div>
-  <img class="pokemon-gallery-img z-1" src="${pokemonImg}">
-  </div>
-  `
-  );
-}
-
-function showLoadingAnimation(pokeIndex, renderContainer) {
-  if (pokeIndex > 19)
-    document.getElementById('pokemon-' + pokeIndex + '-' + renderContainer).classList.add('loading-animation');
+function renderPokemonTypes(currentPokemon, renderContainer) {
+  let pokemonTypes = getPokemonTypes(currentPokemon);
+  let pokemonName = currentPokemon['name'];
+  let id1 = pokemonName + '-' + renderContainer;
+  let id2 = 'types-' + pokemonName + '-' + renderContainer;
+  document.getElementById(id1).classList.add('bg-' + pokemonTypes[0]);
+  pokemonTypes.forEach((type) => (document.getElementById(id2).innerHTML += `<span class="poketype">${type}</span>`));
 }
 
 /**
- * Gets the types of the Pokemon that is beeing rendered and sets the color of it's card (Pokedex-card or header of about-view).
+ * Gets the types of the Pokemon that is beeing rendered.
  */
-function getTypes(currentPokemon, id1, id2) {
-  let pokeTypes = [];
-  currentPokemon.types.forEach((type, currentTypeOrder) => {
-    pokeTypes.push(type.type.name);
-    document.getElementById(id1).innerHTML += `<span class="poketype">${pokeTypes[currentTypeOrder]}</span>`;
-
-    setTypeColor(currentTypeOrder, pokeTypes[0], id2);
+function getPokemonTypes(currentPokemon) {
+  return currentPokemon['types'].map((type) => {
+    return type['type']['name'];
   });
-  return pokeTypes;
-}
-
-/**
- * Sets the color of the Pokemon Card in the Gallery view or the header of the Pokemon beeing viewed depending on the Pokemons first type.
- * @param {number} currentTypeOrder - The order of the current type of the Pokemon.
- * @param {string} firstType - The first type of the Pokemon.
- * @param {string} colorContainer - The element the color is beeing applied to.
- */
-function setTypeColor(currentTypeOrder, firstType, colorContainer) {
-  if (currentTypeOrder === 0 && colorContainer != 'pokecard-header') {
-    document.getElementById(colorContainer).classList.add('bg-' + firstType);
-  }
-  if (currentTypeOrder === 0 && colorContainer == 'pokecard-header') {
-    setHeaderInShowPokemon(firstType);
-  }
 }
 
 /* ---------------  SHOW SELECTED POKEMON  --------------- */
 
 /**
- * Sets the header color of the card of the selected Pokemon.
- * @param {string} type - The first type of the selected Pokemon.
- */
-function setHeaderInShowPokemon(type) {
-  let bg2 = `linear-gradient(rgba(var(--bg-${type}-numbers),0.6), rgba(var(--bg-${type}-numbers),.3))`;
-  document.getElementById('pokecard-header').style.background = bg2;
-  document.body.style.setProperty('--active-color', `var(--bg-${type})`);
-}
-
-/**
  * Shows the selected Pokemon.
- * @param {number} pokeIndex - The index of the selected Pokemon.
- * @param {string} sourceContainer - The container from which the Pokemon was selected (Pokedex or Search-results).
+ *
+ * @param {string} pokemonName - The name of the selected Pokemon.
  */
-function showPokemon(pokeIndex, sourceContainer) {
-  let pokemon;
-  if (sourceContainer === 'search-result') pokemon = searchResultPokemons[pokeIndex];
-  else pokemon = loadedPokedexPokemons[pokeIndex];
+function showSelectedPokemon(pokemonName) {
+  let selectedPokemon = checkAlreadyLoadedPokemon(pokemonName);
+  let pokemonTypes = getPokemonTypes(selectedPokemon, 'pokecard-header');
 
-  let pokemonImg = pokemon['sprites']['other']['official-artwork']['front_default'];
-  document.getElementById('pokecard--about-bg').classList.remove('d-none');
-  document.getElementById('about-pokemon-img').src = pokemonImg;
-  document.getElementById('about-pokemon-h1').innerHTML = pokemon['name'];
-
-  loadproperties(pokemon);
-}
-
-function loadproperties(selectedPokemon) {
-  let pokeTypes = getTypes(selectedPokemon, 'types--about', 'pokecard-header');
-  setBgVideo(pokeTypes);
-  fillAboutTable(selectedPokemon);
-  fillStatsTable(selectedPokemon);
+  openPokemonCard(pokemonTypes);
+  renderHeaderArea(selectedPokemon, pokemonTypes);
+  showProperties(selectedPokemon);
 }
 
 /**
- * Sets the background video for the selected Pokemon depending of it's types.
+ * Opens the Pokemon-card and shows the background-video.
+ *
+ * @param {array} pokemonTypes - The types of the selected Pokemon.
+ */
+function openPokemonCard(pokemonTypes) {
+  document.getElementById('selected-pokemon--bg').classList.remove('d-none');
+  setBgVideo(pokemonTypes);
+}
+
+/**
+ * Sets the background-video for the selected Pokemon depending on its types.
+ *
  * @param {array} pokeTypes - The types of the selected Pokemon.
  */
 function setBgVideo(pokeTypes) {
   // prettier-ignore
-  document.getElementById('pokecard--about-bg').insertAdjacentHTML('afterbegin',
+  document.getElementById('selected-pokemon--bg').insertAdjacentHTML('afterbegin',
   `<video autoplay muted loop id="bg-video"></video>`);
   let source = document.createElement('source');
   if (['fire', 'fighting'].some((type) => pokeTypes.includes(type))) {
@@ -187,7 +234,53 @@ function setBgVideo(pokeTypes) {
 }
 
 /**
- * Fills the table in the about-section with information.
+ * Renders the header and the image of the pokemon-card.
+ *
+ * @param {object} selectedPokemon - The pokemon that is beeing rendered.
+ */
+function renderHeaderArea(selectedPokemon, pokemonTypes) {
+  let pokemonImg = getPokemonImage(selectedPokemon);
+  /* let pokemonImg = selectedPokemon['sprites']['other']['official-artwork']['front_default']; */
+  document.getElementById('selected-pokemon-img').src = pokemonImg;
+  document.getElementById('selected-pokemon-h1').innerHTML = selectedPokemon['name'];
+  insertPokemonTypesInHeader(pokemonTypes);
+  setHeaderColor(pokemonTypes[0]);
+}
+
+/**
+ * Inserts the Pokemon's types in the header.
+ *
+ * @param {array} pokemonTypes - The types of the selected Pokemon.
+ */
+function insertPokemonTypesInHeader(pokemonTypes) {
+  let id2 = 'types--selected-pokemon';
+  pokemonTypes.forEach((type) => (document.getElementById(id2).innerHTML += `<span class="poketype">${type}</span>`));
+}
+
+/**
+ * Sets the header-color of the selected Pokemon depending on the first Pokemon-type.
+ *
+ * @param {string} type - The first type of the selected Pokemon.
+ */
+function setHeaderColor(type) {
+  let bg2 = `linear-gradient(rgba(var(--bg-${type}-numbers),0.6), rgba(var(--bg-${type}-numbers),.3))`;
+  document.getElementById('pokecard-header').style.background = bg2;
+  document.body.style.setProperty('--active-color', `var(--bg-${type})`);
+}
+
+/**
+ * Shows the Pokemon's properties in the tables in the about-section and in the Base Stats-section.
+ *
+ * @param {object} selectedPokemon
+ */
+function showProperties(selectedPokemon) {
+  fillAboutTable(selectedPokemon);
+  fillStatsTable(selectedPokemon);
+}
+
+/**
+ * Fills the tables in the about-section with information.
+ *
  * @param {object} selectedPokemon - Object of the selected Pokemon the user wants to open.
  */
 function fillAboutTable(selectedPokemon) {
@@ -221,23 +314,26 @@ function getAbilities(selectedPokemon) {
 
 /**
  * Fills the table in the Base Stats-section with information.
+ *
  * @param {object} selectedPokemon - Object of the selected Pokemon the user wants to open.
  */
 function fillStatsTable(selectedPokemon) {
   let sum = 0;
-  let statCells = Array.from(document.getElementsByClassName('stat-table-td'));
-  statCells.forEach((cell, index) => {
-    if (index < 6) {
-      cell.innerHTML = selectedPokemon.stats[index].base_stat;
-      sum += selectedPokemon.stats[index].base_stat;
-    }
-  });
+  let tableCells = Array.from(document.getElementsByClassName('stat-table-td'));
+
+  for (let i = 0; i < 6; i++) {
+    let currentValue = selectedPokemon.stats[i].base_stat;
+    tableCells[i].innerHTML = currentValue;
+    sum += currentValue;
+  }
   document.getElementById('total').innerHTML = sum;
 }
 
 function hidePokemon() {
-  document.getElementById('pokecard--about-bg').classList.add('d-none');
-  ['types--about', 'species', 'abilities'].forEach((element) => (document.getElementById(element).innerHTML = ''));
+  document.getElementById('selected-pokemon--bg').classList.add('d-none');
+  ['types--selected-pokemon', 'species', 'abilities'].forEach(
+    (element) => (document.getElementById(element).innerHTML = '')
+  );
   document.getElementById('bg-video').remove();
   document.getElementById('pokecard-header').style.background = '';
 }
@@ -246,6 +342,7 @@ function hidePokemon() {
 
 /**
  * Switches between the two tabs in the Pokemon-card.
+ *
  * @param {string} selectedTab - The id of the tab the user has clicked on.
  */
 function switchTab(selectedTab) {
@@ -256,23 +353,44 @@ function switchTab(selectedTab) {
   }
 }
 
-/* ------------------  SEARCH  ------------------ */
+/* ------------------  SEARCH INPUT FIELD  ------------------ */
 
-function openCloseSearchField() {
+/**
+ * Opens the search input-field when it's not yet opened and shows a search-hint. Closes the search input-field when it's already opened.
+ */
+function toggleSearchField() {
   if (searchIsOpen === false) {
     openSearchField();
+    showSearchHint('Search by name: Type at least 3 letters');
   } else {
     closeSearchField();
   }
 }
 
-function showSearchHint() {
+/**
+ * Shows a hint above the search input-field. If there is already an open hint, this one will be deleted before showing the next hint. The content of the hint is specified in the parameter.
+ *
+ * @param {string} hintText - The text the search-hint will show.
+ */
+function showSearchHint(hintText) {
+  removeSearchHint();
   // prettier-ignore
   document.getElementById('search-container').insertAdjacentHTML('beforeend',
-    `<div id="search-hint">Search by name: Type at least 3 letters</div>`
+    `<div id="search-hint">${hintText}</div>`
   );
 }
 
+function removeSearchHint() {
+  let searchHint = document.getElementById('search-hint');
+
+  if (searchHint) {
+    searchHint.remove();
+  }
+}
+
+/**
+ * Opens the search input-field and adds an eventlistener to the body for closing the search input-field.
+ */
 function openSearchField() {
   searchIsOpen = true;
   document.getElementById('search-container').style.background = 'rgba(255,255,255,.8)';
@@ -284,29 +402,27 @@ function openSearchField() {
 }
 
 /**
- * Adds a click-event to the body for closing the search-input when clicking somewhere. -> For mobile-devices.
- * With timeout for avoiding firing this onclick-event when opening the search-container.
+ * Adds a click-event to the body for closing the search-input when clicking somewhere outside the search-field.
+ * With timeout for avoiding adding and firing this onclick-event at the same time when opening the search-container by clicking on the search-icon.
  */
 function addCloseSearchEventToBody() {
-  // prettier-ignore
   setTimeout(() => {
     document.body.addEventListener('click', (event) => {
-        let exclude = ['search-container', 'search-btn', 'search-icon', 'search-input'];
-        if (!exclude.includes(event.target.id)) {
-          console.log('close search field', event.target)
-          closeSearchField();
-        }
+      let exclude = ['search-container', 'search-btn', 'search-icon', 'search-input'];
+      if (!exclude.includes(event.target.id)) {
+        closeSearchField();
       }
-    );
+    });
   }, 10);
 }
 
+/**
+ * Closes the search input-field.
+ */
 function closeSearchField() {
   searchIsOpen = false;
   let searchContainer = document.getElementById('search-container');
-  let searchHint = document.getElementById('search-hint');
-
-  if (searchHint) searchHint.remove();
+  removeSearchHint();
   document.getElementById('search-input').style.transform = 'scaleX(0%)';
 
   setTimeout(() => {
@@ -314,141 +430,264 @@ function closeSearchField() {
   }, 80);
 }
 
+/* ------------------  SEARCH  ------------------ */
+
 /**
- * Removes the last search results and starts a new search.
+ * Starts a new search when user stopped typing into the input-field for at least 300ms.
  */
 function startSearch() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
     search();
-  }, 200);
+  }, 300);
 }
 
 /**
- * Gets the users search-input and checks if the input is a number, text or void. If it's a number, the Pokemon with that number will be loaded from the IPA. If it's a string, it checks for matching Pokemon-names from 3 characters on. If it's void (= the user deleted his input), the search-results will be closed.
+ * Gets the users search-input and checks if the input is a number, text or void (= the user deleted his input) for calling the corresponding search-function or closing the search-result.
  */
 async function search() {
   let query = document.getElementById('search-input').value;
-  console.log(Number(query));
 
-  if (Number(query)) {
-    removeLastSearchResult();
-    let matchingPokemon = await getSearchedPokemon(query);
-    renderSearchResult(matchingPokemon);
+  if (Number(query) || query === '0') {
+    searchByNumber(query);
   } else if (isNaN(query) && query.length >= 3) {
-    removeLastSearchResult();
-    query = query.toLowerCase();
-    findMatchingPokemons(query);
+    searchByName(query);
   } else if (query.length === 0) {
     closeSearchResult();
   }
 }
 
+/**
+ * Deletes the old search result, searches for the Pokemon with the number from the user-input and renders it if the number is between 0 and 1118 (number of existing Pokemons). If the user-input is beyond these numbers, a search-hint is shown that there are no matches found.
+ *
+ * @param {string} query - The user-input (digit).
+ */
+async function searchByNumber(query) {
+  removeLastSearchResult();
+  if (query > 0 && query < 1118) {
+    let matchingPokemon = await getPokemon(query);
+    showSearchResultContainer();
+    addPokemonCard(matchingPokemon, 'search-result');
+  } else {
+    showSearchHint('No matches found');
+  }
+}
+
 function removeLastSearchResult() {
   document.getElementById('search-result').innerHTML = '';
-  searchResultPokemons = [];
 }
 
 /**
- * Finds the Pokemon-names that matches the users input in the searchfield.
- * @param {string} query - The users input in the searchfield.
+ *  Deletes the old search result, searches for the Pokemon names who contain the user-input and shows the matching Pokemons. If there is no Pokemon name that contains the user-input, a search-hint is shown that there are no matches found.
+ *
+ * @param {string} query - The user-input (letters).
  */
-async function findMatchingPokemons(query) {
-  let matchingPokemonNames = filterAllPokemonNames(query);
-  if (matchingPokemonNames) {
-    for (let i = 0; i < matchingPokemonNames.length; i++) {
-      let currentName = matchingPokemonNames[i];
-      let matchingPokemon = checkAlreadyLoadedPokemon(currentName);
-      if (!matchingPokemon) {
-        matchingPokemon = await getSearchedPokemon(currentName);
-      }
-      searchResultPokemons.push(matchingPokemon);
-      renderSearchResult(matchingPokemon, i);
-    }
+async function searchByName(query) {
+  removeLastSearchResult();
+  let matchingPokemonNames = filterAllPokemonNames(query.toLowerCase());
+  if (matchingPokemonNames.length > 0) {
+    showSearchResultContainer();
+    showLoadingCircle();
+    await renderSearchResult(matchingPokemonNames);
+  } else {
+    showSearchHint('No matches found');
   }
 }
 
 /**
- * Filters allPokemonNames for the users input in the searchfield and returns the matching Pokemons as array.
- * @param {string} query - The users input in the searchfield.
- * @returns {array} - Contains the Pokemon-names which contain the query.
+ * Shows the search-result-container and hides the Pokedex. Saves scrollposition in Pokedex.
+ */
+function showSearchResultContainer() {
+  getCurrentScrollPosition();
+  document.getElementById('pokedex').classList.add('d-none');
+  ['search-result', 'close-search-result-btn'].forEach((element) =>
+    document.getElementById(element).classList.remove('d-none')
+  );
+}
+
+/**
+ * Filters allPokemonNames for the user-input in the searchfield and returns the matching Pokemon names as array.
+ *
+ * @param {string} query - The user-input in the searchfield.
+ * @returns {array} - Contains the Pokemon-names which matches the query.
  */
 function filterAllPokemonNames(query) {
   return allPokemonNames.filter((name) => name.includes(query));
 }
 
-function checkAlreadyLoadedPokemon(result) {
-  let matchingPokemonNames = loadedPokedexPokemons.filter((pokemon) => pokemon.name.includes(result));
-  matchingPokemonNames = matchingPokemonNames[0];
-  return matchingPokemonNames;
+/**
+ * Loads the Pokemon-objects that belong to the Pokemon names which match the user-input. Renders the matching Pokemons into the search-result-container.
+ *
+ * @param {array} matchingPokemonNames - Array with the Pokemon names that contain the user-input in the search-field.
+ */
+async function renderSearchResult(matchingPokemonNames) {
+  let searchResultPokemons = await loadMatchingPokemons(matchingPokemonNames);
+  hideLoadingCircle();
+  searchResultPokemons.forEach((pokemon) => addPokemonCard(pokemon, 'search-result'));
+  goToTop()
+  loadingPokemon = false;
 }
 
 /**
- * Gets the Pokemon-data of the searched Pokemon for the Pokemon-cards in the search-result-container.
- * @param {string or number} searchResult - The name or index of the currently searched Pokemon.
+ * Loads the pokemon-objects that belong to the Pokemon names which match the user-input and pushes them into the array searchResultPokemons and into loadedPokemons.
+ *
+ * @param {array} matchingPokemonNames - Array with the Pokemon names that contain the user-input in the search-field.
+ * @returns {Promise<array>} - Array that contains the Pokemon-objects that match the user-input in the search-field.
  */
-async function getSearchedPokemon(pokemon) {
-  if (pokemon) {
-    let url = `https://pokeapi.co/api/v2/pokemon/${pokemon}`;
-    let response = await fetch(url);
-    let currentSearchedPokemon = await response.json();
-    /* renderSearchResult(currentSearchedPokemon, resultIndex); */
-    return currentSearchedPokemon;
+async function loadMatchingPokemons(matchingPokemonNames) {
+  let searchResultPokemons = [];
+  let matchingPokemon;
+  for (let i = 0; i < matchingPokemonNames.length; i++) {
+    matchingPokemon = await getMatchingPokemon(matchingPokemonNames[i]);
+    searchResultPokemons.push(matchingPokemon);
+    loadedPokemons.push(matchingPokemon);
   }
+  return searchResultPokemons;
 }
 
-function renderSearchResult(currentSearchedPokemon, resultIndex) {
-  document.getElementById('pokedex').classList.add('d-none');
-  ['search-result', 'close-search-result-btn'].forEach((element) =>
-    document.getElementById(element).classList.remove('d-none')
-  );
-  addPokemonCard(currentSearchedPokemon, 'search-result', resultIndex);
+/**
+ * Gets the matching pokemon-object. Checks if it has already been loaded to the global variable loadedPokemons. If not, gets it from the API.
+ * 
+ * @param {string} matchingPokemonName - The name of the currently checked Pokemon.
+ * @returns {object} - The pokemon-object corresponging to matchingPokemonName.
+ */
+async function getMatchingPokemon(matchingPokemonName) {
+  let matchingPokemon = checkAlreadyLoadedPokemon(matchingPokemonName);
+  if (!matchingPokemon) {
+    matchingPokemon = await getPokemon(matchingPokemonName);
+  }
+  return matchingPokemon;
 }
 
+/**
+ * Closes the search-result container and shows the Pokédex at the las scroll-position.
+ */
 function closeSearchResult() {
   document.getElementById('pokedex').classList.remove('d-none');
   ['search-result', 'close-search-result-btn'].forEach((element) =>
     document.getElementById(element).classList.add('d-none')
   );
   document.getElementById('search-input').value = '';
+  resetLastScrollPosition();
 }
 
-/* -----------------   GENERAL FUNCTIONS  ----------------- */
+/* -----------------  LOADING ANIMATIONS  ----------------- */
+
 
 /**
- * Checks if the end of document is reached and, if so, loads more Pokemon
+ * Shows a animation with a blue border around the new rendered cards in the Pokédex for indicating to the user which cards have been new loaded after scrolling to the bottom of the page.
+ *
+ * @param {string} pokemonName - The name of the current Pokemon.
+ */
+ function showLoadingCardAnimation(pokemonName) {
+  if (pokedexIndex > 19) document.getElementById(pokemonName + '-pokedex').classList.add('loading-animation');
+}
+
+/**
+ * Shows the light-reflex-animation when loading Pokemon-cards.
+ */
+function showLightReflexAnimation() {
+  let cardAnimLayers = Array.from(document.getElementsByClassName('light-anim-layer'));
+  cardAnimLayers.forEach((layer) => {
+    layer.classList.add('light-animation');
+  });
+}
+
+/**
+ * Shows the rotating-circle-animation for signalising that data is beeing loaded.
+ */
+ function showLoadingCircle() {
+  document.getElementById('loading-circle-bg').classList.remove('d-none');
+}
+
+function hideLoadingCircle() {
+  document.getElementById('loading-circle-bg').classList.add('d-none');
+}
+
+/* -----------------   WINDOW FUNCTIONS  ----------------- */
+
+/**
+ * Initiats the functions toggleToTopButton() and loadMorePokemon() on scrolling.
  */
 window.onscroll = function () {
+  toggleToTopButton();
+  loadMorePokemon();
+};
+
+/**
+ * Shows or hides the to-top-button dependong on the scroll-position.
+ */
+function toggleToTopButton(){
   if (window.scrollY > window.innerHeight) {
     document.getElementById('to-top-btn').classList.remove('d-none');
   } else {
     document.getElementById('to-top-btn').classList.add('d-none');
   }
-  if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
-    loadPokemon();
-  }
-};
-
-/**
- * Scrolls to the top of the page
- */
-function scrollToTop() {
-  document.documentElement.scrollTop = 0;
 }
 
+/**
+ * Checks if the end of document is reached and, if so, loads more Pokemon.
+ */
+function loadMorePokemon(){
+  if (
+    window.scrollY + window.innerHeight >= document.body.offsetHeight &&
+    loadingPokemon === false &&
+    !document.getElementById('pokedex').classList.contains('d-none')
+  ) {
+    load20Pokemon();
+  }
+}
+
+/**
+ * Scrolls to the top of the page without scroll-behaviour: smooth;
+ */
+function goToTop(){
+  window.scrollTo(0, 0);
+}
+
+/**
+ * Scrolls to the top of the page.
+ */
+function scrollToTop() {
+  document.documentElement.style.scrollBehavior = 'smooth';
+  setTimeout(() => {
+    goToTop();
+    document.documentElement.style.scrollBehavior = 'auto';   
+  }, 10);
+}
+
+/**
+ * Gets the current scroll-position in the Pokedex before rendering the search-result.
+ */
+function getCurrentScrollPosition() {
+  if (!document.getElementById('pokedex').classList.contains('d-none')) {
+    currentScrollPosition = window.scrollY;
+  }
+}
+
+/**
+ * Resets the last scroll-position in the Pokedex after closing the search-container.
+ */
+function resetLastScrollPosition() {
+  document.documentElement.scrollTop = currentScrollPosition;
+}
+
+/**
+ * Calls adjustPokeImgToWindowSize() when the user resized the window.
+ */
 window.onresize = function () {
-  checkWindowSize();
+  adjustPokeImgToWindowSize();
 };
 
 /**
- * Adds or removes the onclick-event for hiding the shown Pokemon to the pokemon-image of the shown Pokemon depending on the window-size.
+ * Adds or removes the hidePokemon-onclick-event to the pokemon-image of the shown Pokemon depending on the window-size and therefore on the position of the image in the card or next to it.
  */
-function checkWindowSize() {
+function adjustPokeImgToWindowSize() {
   if (window.innerHeight < 570) {
-    document.getElementById('about-pokemon-img').removeEventListener('click', hidePokemon);
+    document.getElementById('selected-pokemon-img').removeEventListener('click', hidePokemon);
   } else if (window.innerWidth < 700) {
-    document.getElementById('about-pokemon-img').removeEventListener('click', hidePokemon);
+    document.getElementById('selected-pokemon-img').removeEventListener('click', hidePokemon);
   } else {
-    document.getElementById('about-pokemon-img').addEventListener('click', hidePokemon);
+    document.getElementById('selected-pokemon-img').addEventListener('click', hidePokemon);
   }
 }
