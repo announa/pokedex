@@ -10,9 +10,17 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css" />
-    <script src="script.js"></script>
-    <title>Document</title>
+    <link rel="stylesheet" href="./css/general_settings.css" />
+    <link rel="stylesheet" href="./css/pokedex.css" />
+    <link rel="stylesheet" href="./css/search_function.css" />
+    <link rel="stylesheet" href="./css/show_pokemon.css" />
+    <link rel="stylesheet" href="./css/media_query.css" />
+    <link rel="shortcut icon" href="./img/favicon_pokeball.ico" type="image/x-icon" />
+    <script src="./js/load_pokemon.js"></script>
+    <script src="./js/render.js"></script>
+    <script src="./js/search_function.js"></script>
+    <script src="./js/window_functions.js"></script>
+    <title>Pokédex</title>
   </head>
   <body class="flex-centered col" onload="init(), adjustPokeImgToWindowSize()">
     <div id="logo" class="d-none">
@@ -22,7 +30,7 @@
 
     <!-- ------------------  LOADING CIRCLE  ------------------ -->
 
-    <div class="loading-circle-bg d-none" id="loading-circle-bg"><div class="loading-circle"></div></div>
+    <div class="loading-circle-bg flex-centered d-none" id="loading-circle-bg"><div class="loading-circle"></div></div>
 
     <!-- ------------------  SEARCH  -------------------- -->
 
@@ -82,12 +90,6 @@
           </div>
           <div class="info-container">
             <table id="about-table">
-              <!-- <thead>
-                <tr>
-                  <th class="pokeinfo-tab active-tab" onclick="switchTab('tab-1')">About</th>
-                  <th class="pokeinfo-tab inactive-tab" onclick="switchTab('tab-2')">Base Stats</th>
-                </tr>
-              </thead> -->
               <tr>
                 <th>Species</th>
                 <td id="species"></td>

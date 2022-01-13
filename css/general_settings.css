@@ -1,0 +1,155 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  padding: 120px 120px;
+  background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('../img/bg-img.jpg') bottom/cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+
+  --bg-fire: rgb(251, 106, 106);
+  --bg-fire-numbers: 251, 106, 106;
+  --bg-grass: rgb(73, 208, 176);
+  --bg-grass-numbers: 73, 208, 176;
+  --bg-bug: rgb(73, 208, 106);
+  --bg-bug-numbers: 73, 208, 106;
+  --bg-water: rgb(85, 168, 246);
+  --bg-water-numbers: 85, 168, 246;
+  --bg-electric: rgb(255, 207, 77);
+  --bg-electric-numbers: 255, 207, 77;
+  --bg-poison: rgb(125, 83, 141);
+  --bg-poison-numbers: 125, 83, 141;
+  --bg-normal: rgb(255, 152, 56);
+  --bg-normal-numbers: 255, 152, 56;
+  --bg-fairy: rgb(243, 119, 243);
+  --bg-fairy-numbers: 243, 119, 243;
+  --bg-ground: rgb(212, 162, 115);
+  --bg-ground-numbers: 212, 162, 115;
+  --bg-fighting: rgb(224, 56, 56);
+  --bg-fighting-numbers: 224, 56, 56;
+  --bg-psychic: rgb(194, 230, 96);
+  --bg-psychic-numbers: 194, 230, 96;
+  --bg-rock: rgb(112, 112, 112);
+  --bg-rock-numbers: 112, 112, 112;
+  --bg-dark: rgb(33, 33, 33);
+  --bg-dark-numbers: 33, 33, 33;
+  --bg-ghost: rgb(196, 196, 196);
+  --bg-ghost-numbers: 196, 196, 196;
+  --bg-ice: rgb(224, 255, 240);
+  --bg-ice-numbers: 224, 255, 240;
+  --active-color: var(--bg-bug);
+}
+
+.bg-fire {
+  background: var(--bg-fire);
+}
+.bg-grass {
+  background: var(--bg-grass);
+}
+.bg-bug {
+  background: var(--bg-bug);
+}
+.bg-water {
+  background: var(--bg-water);
+}
+.bg-electric {
+  background: var(--bg-electric);
+}
+.bg-poison {
+  background: var(--bg-poison);
+}
+.bg-normal {
+  background: var(--bg-normal);
+}
+.bg-fairy {
+  background: var(--bg-fairy);
+}
+.bg-ground {
+  background: var(--bg-ground);
+}
+.bg-fighting {
+  background: var(--bg-fighting);
+}
+.bg-psychic {
+  background: var(--bg-psychic);
+}
+.bg-rock {
+  background: var(--bg-rock);
+}
+.bg-dark {
+  background: var(--bg-dark);
+}
+.bg-ghost {
+  background: var(--bg-ghost);
+}
+.bg-steel {
+  background: var(--bg-ghost);
+}
+.bg-dragon {
+  background: var(--bg-fire);
+}
+.bg-ice {
+  background: var(--bg-ice);
+  text-shadow: 0 0 7px rgba(0, 0, 0, 0.8);
+}
+
+.bg-pokeball {
+  width: 60%;
+  filter: invert(100%) opacity(10%);
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+}
+
+.z-1 {
+  z-index: 1;
+}
+
+h1 {
+  font-size: 1.7rem;
+  margin-bottom: 15px;
+  line-height: 2rem;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.transparent-btn {
+  background: none;
+  box-shadow: none;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  animation: jumping-btn 500ms ease-in-out infinite alternate;
+}
+
+@keyframes jumping-btn {
+  to {
+    transform: translateY(-10%);
+  }
+}
+
+.flex-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.col {
+  flex-direction: column;
+}
+
+.d-none {
+  display: none !important;
+}
