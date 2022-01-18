@@ -4,6 +4,10 @@
   font-family: 'Poppins', sans-serif;
 }
 
+html{
+  scroll-behavior: smooth;
+}
+
 body {
   padding: 120px 120px;
   background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('../img/bg-img.jpg') bottom/cover;

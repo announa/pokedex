@@ -38,18 +38,16 @@ function loadMorePokemon() {
  * Scrolls to the top of the page without scroll-behaviour: smooth;
  */
 function goToTop() {
+  document.documentElement.style.scrollBehavior = 'auto';
   window.scrollTo(0, 0);
+  document.documentElement.style = '';
 }
 
 /**
  * Scrolls to the top of the page.
  */
 function scrollToTop() {
-  document.documentElement.style.scrollBehavior = 'smooth';
-  setTimeout(() => {
-    goToTop();
-    document.documentElement.style.scrollBehavior = 'auto';
-  }, 10);
+  window.scrollTo(0, 0);
 }
 
 /**
