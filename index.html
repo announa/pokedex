@@ -12,6 +12,7 @@
     />
     <link rel="stylesheet" href="./css/general_settings.css" />
     <link rel="stylesheet" href="./css/pokedex.css" />
+    <link rel="stylesheet" href="./css/header.css" />
     <link rel="stylesheet" href="./css/search_function.css" />
     <link rel="stylesheet" href="./css/show_pokemon.css" />
     <link rel="stylesheet" href="./css/media_query.css" />
@@ -32,31 +33,33 @@
 
     <div class="loading-circle-bg flex-centered d-none" id="loading-circle-bg"><div class="loading-circle"></div></div>
 
-    <!-- ------------------  SEARCH  -------------------- -->
+    <!-- ------------------  HEADER  -------------------- -->
+    <div class="header d-none flex-centered" id="header">
+      <img   id="close-search-result-btn"
+      class="close-btn transparent-btn flex-centered d-none"
+      onclick="closeSearchResult()" src="./img/arrow-left_color.png" />
+      <!-- <span id="close-searc-text">Pokedéx</span> -->
+      <img src="./img/pokemon-logo.png" id="header-logo"/>
+      <!-- ------------------  SEARCH  -------------------- -->
 
-    <!-- <div id="search-header" class="flex-centered"> -->
-    <div id="search-container" class="flex-centered d-none">
-      <!-- <div id="search-container" class="flex-centered d-none" onmouseleave="closeSearchField()"> -->
-      <input
-        type="text"
-        id="search-input"
-        minlength="3"
-        placeholder="Search by name or number"
-        oninput="startSearch()"
-      />
-      <!-- onkeypress="checkIfEnter(event)" -->
-      <button id="search-btn" class="button-filled flex-centered" onclick="toggleSearchField()">
-        <img src="./img/search-pokeball.svg" id="search-icon" alt="search" />
-      </button>
+      <!-- <div id="search-header" class="flex-centered"> -->
+      <div id="search-container" class="flex-centered d-none">
+        <!-- <div id="search-container" class="flex-centered d-none" onmouseleave="closeSearchField()"> -->
+        <input
+          type="text"
+          class="d-none"
+          id="search-input"
+          minlength="3"
+          placeholder="Search by name or number"
+          oninput="startSearch()"
+        />
+        <!-- onkeypress="checkIfEnter(event)" -->
+        <button id="search-btn" class="button-filled flex-centered" onclick="toggleSearchField()">
+          <img src="./img/search-pokeball.svg" id="search-icon" alt="search" />
+        </button>
+      </div>
     </div>
     <!-- </div> -->
-    <button
-      id="close-search-result-btn"
-      class="close-btn transparent-btn flex-centered d-none"
-      onclick="closeSearchResult()"
-    >
-      <img src="./img/arrow-left.png" /><span id="close-searc-text">Pokedéx</span>
-    </button>
     <div id="search-result" class="flex-centered wrap d-none"></div>
 
     <!-- ----------------  POKÉDEX  ------------------- -->

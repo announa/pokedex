@@ -41,7 +41,12 @@ function removeSearchHint() {
  */
 function openSearchField() {
   searchIsOpen = true;
-  document.getElementById('search-container').style.background = 'rgba(255,255,255,.8)';
+  if(window.innerWidth < 700){
+    document.getElementById('header-logo').style.width = '0px';
+  }
+/*   document.getElementById('search-container').style.background = 'rgba(255,255,255,.8)'; */
+
+document.getElementById('search-input').classList.remove('d-none');
   document.getElementById('search-input').focus();
   setTimeout(() => {
     document.getElementById('search-input').style.transform = 'scaleX(100%)';
@@ -72,6 +77,13 @@ function closeSearchField() {
   let searchContainer = document.getElementById('search-container');
   removeSearchHint();
   document.getElementById('search-input').style.transform = 'scaleX(0%)';
+  setTimeout(() => {
+    document.getElementById('search-input').classList.add('d-none');
+  }, 225);
+
+  if(window.innerWidth < 700){
+    document.getElementById('header-logo').style.width = '';
+  }
 
   setTimeout(() => {
     searchContainer.style.background = '';

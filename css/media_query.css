@@ -2,29 +2,39 @@
 
 @media (min-width: 1400px) {
   body {
-    padding: 150px 200px;
+    padding: 100px 200px;
+  }
+  .header{
+    padding: 0 200px;
   }
 }
 @media (min-width: 1800px) {
   body {
     padding: 150px 200px;
   }
+
+  .header{
+    height: 100px;
+  }
   .pokedex-card {
     width: 280px;
     padding: 20px 25px;
   }
-
+  
   h1 {
     font-size: 2rem;
   }
-
+  
   #selected-pokemon-h1 {
     font-size: 2.5rem;
   }
 }
 @media (max-width: 1000px) {
   body {
-    padding: 70px 70px;
+    padding: 100px 70px;
+  }
+  .header{
+  padding: 0 70px;
   }
 
   #search-container {

@@ -28,6 +28,7 @@ async function loadAllPokemonNames() {
  */
 function loadPokedex() {
   document.getElementById('logo').classList.add('d-none');
+  document.getElementById('header').classList.remove('d-none');
   document.getElementById('search-container').classList.remove('d-none');
   document.getElementById('search-input').value = '';
   load20Pokemon();
